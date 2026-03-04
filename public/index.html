@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audio → MP3 Converter</title>
+  <style>
+    :root {
+      --bg: #0f0f12;
+      --surface: #18181d;
+      --border: #2a2a32;
+      --text: #e8e6e3;
+      --muted: #8b8685;
+      --accent: #c9a227;
+      --accent-hover: #dbb42e;
+      --success: #3d9d6b;
+      --error: #c75c5c;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    main {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0 0 0.25rem 0;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .dropzone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      transition: border-color 0.2s, background 0.2s;
+      background: var(--surface);
+    }
+
+    .dropzone.dragover {
+      border-color: var(--accent);
+      background: rgba(201, 162, 39, 0.06);
+    }
+
+    .dropzone .icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      opacity: 0.8;
+    }
+
+    .dropzone .hint {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    .upload-row {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-choose {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-choose:hover {
+      background: var(--border);
+    }
+
+    .file-name {
+      font-size: 0.9rem;
+      color: var(--accent);
+      word-break: break-all;
+    }
+
+    .actions {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 0.85rem 1.25rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-load {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-load:hover:not(:disabled) {
+      background: var(--border);
+    }
+
+    .progress-wrap {
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .progress-wrap.visible {
+      display: block;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--border);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.15s ease-out;
+    }
+
+    .progress-text {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .message {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .message.visible {
+      display: block;
+    }
+
+    .message.success {
+      background: rgba(61, 157, 107, 0.15);
+      color: var(--success);
+    }
+
+    .message.error {
+      background: rgba(199, 92, 92, 0.15);
+      color: var(--error);
+    }
+
+    .message.info {
+      background: rgba(201, 162, 39, 0.1);
+      color: var(--accent);
+    }
+
+    a.download-link {
+      display: inline-block;
+      margin-top: 0.5rem;
+      color: var(--accent);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    a.download-link:hover {
+      text-decoration: underline;
+    }
+
+    .log {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: #0a0a0c;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-family: ui-monospace, monospace;
+      color: var(--muted);
+      max-height: 120px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .log.visible {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Audio → MP3</h1>
+    <p class="subtitle">Convert M4A or any video file to MP3 in your browser.</p>
+
+    <div class="dropzone" id="dropzone">
+      <div class="icon">🎵</div>
+      <div>Drop a file here or use the button below</div>
+      <div class="hint">M4A, MP4, WebM, MOV, AVI, and other audio/video formats</div>
+      <div class="upload-row">
+        <input type="file" id="fileInput" accept="audio/*,video/*" style="display: none" />
+        <button type="button" class="btn-choose" id="chooseBtn">Choose file</button>
+        <span class="file-name" id="fileName"></span>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button type="button" class="btn-load" id="btnLoad">Load FFmpeg (local, one-time)</button>
+      <button type="button" class="btn-primary" id="btnConvert" disabled>Convert to MP3</button>
+    </div>
+
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-text" id="progressText">Preparing…</div>
+    </div>
+
+    <div class="message" id="message"></div>
+    <pre class="log" id="log"></pre>
+  </main>
+
+  <!-- File selection works even if the main script loads late or fails -->
+  <script>
+    (function() {
+      var input = document.getElementById('fileInput');
+      var nameEl = document.getElementById('fileName');
+      if (!input || !nameEl) return;
+      function onFileChange() {
+        var file = input.files && input.files[0];
+        if (file) {
+          nameEl.textContent = file.name;
+          window.__audioConverterFile = file;
+        } else {
+          nameEl.textContent = '';
+          window.__audioConverterFile = null;
+        }
+      }
+      input.addEventListener('change', onFileChange);
+      if (window.__audioConverterFile) {
+        nameEl.textContent = window.__audioConverterFile.name;
+      }
+    })();
+  </script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
