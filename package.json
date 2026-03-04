@@ -4,6 +4,7 @@
   "description": "Local web app to convert M4A and video files to MP3",
   "type": "module",
   "main": "electron/main.js",
+  "author": "Frederick Berberich <Fredberbs3@gmail.com",
   "scripts": {
     "copy-lib": "node copy-lib.js",
     "start": "node copy-lib.js && node server.js",
